@@ -159,6 +159,160 @@
 - `idx_rule(rule_type, rule_id)`
 - `idx_create_time(create_time)`
 
+## MySQL DDL
+
+```sql
+-- ----------------------------
+-- Table structure for manage_chat_log
+-- ----------------------------
+DROP TABLE IF EXISTS `manage_chat_log`;
+CREATE TABLE `manage_chat_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+  `conversation_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '会话编号',
+  `trace_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '链路追踪编号',
+  `user_id` bigint NOT NULL DEFAULT 0 COMMENT '用户编号',
+  `user_type` tinyint NOT NULL DEFAULT 0 COMMENT '用户类型',
+  `role` tinyint NOT NULL DEFAULT 0 COMMENT '消息角色',
+  `content` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '消息内容',
+  `content_type` tinyint NOT NULL DEFAULT 1 COMMENT '内容类型',
+  `model` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '模型标识',
+  `prompt_tokens` int NOT NULL DEFAULT 0 COMMENT 'Prompt Token 数',
+  `completion_tokens` int NOT NULL DEFAULT 0 COMMENT 'Completion Token 数',
+  `total_tokens` int NOT NULL DEFAULT 0 COMMENT 'Token 总数',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0 成功 1 失败）',
+  `error_code` int NOT NULL DEFAULT 0 COMMENT '错误码',
+  `error_msg` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '错误信息',
+  `user_ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '用户 IP',
+  `user_agent` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '浏览器 UA',
+  `begin_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `duration` int NOT NULL COMMENT '耗时（毫秒）',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
+  INDEX `idx_trace_id`(`trace_id` ASC) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '对话日志表';
+
+-- ----------------------------
+-- Records of manage_chat_log
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for manage_api_invoke_log
+-- ----------------------------
+DROP TABLE IF EXISTS `manage_api_invoke_log`;
+CREATE TABLE `manage_api_invoke_log`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '日志主键',
+  `chat_log_id` bigint NOT NULL DEFAULT 0 COMMENT '对话日志编号',
+  `conversation_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '会话编号',
+  `trace_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '链路追踪编号',
+  `user_id` bigint NOT NULL DEFAULT 0 COMMENT '用户编号',
+  `user_type` tinyint NOT NULL DEFAULT 0 COMMENT '用户类型',
+  `invoke_type` tinyint NOT NULL DEFAULT 0 COMMENT '调用类型',
+  `application_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '应用名',
+  `service_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '服务名',
+  `request_method` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '请求方法名',
+  `request_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '请求地址',
+  `request_headers` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '请求 Header',
+  `request_body` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '请求 Body',
+  `response_status` int NOT NULL DEFAULT 0 COMMENT '响应状态码',
+  `response_body` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '响应结果',
+  `success` bit(1) NOT NULL DEFAULT b'1' COMMENT '是否成功',
+  `result_code` int NOT NULL DEFAULT 0 COMMENT '结果码',
+  `result_msg` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '结果提示',
+  `begin_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `duration` int NOT NULL COMMENT '耗时（毫秒）',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_chat_log_id`(`chat_log_id` ASC) USING BTREE,
+  INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
+  INDEX `idx_trace_id`(`trace_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '接口调用日志表';
+
+-- ----------------------------
+-- Records of manage_api_invoke_log
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for manage_activity_type_image_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `manage_activity_type_image_rel`;
+CREATE TABLE `manage_activity_type_image_rel`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增编号',
+  `activity_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '活动类型',
+  `image_file_id` bigint NOT NULL DEFAULT 0 COMMENT '通用图片文件编号',
+  `sort` int NOT NULL DEFAULT 0 COMMENT '排序',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_activity_type`(`activity_type` ASC) USING BTREE,
+  INDEX `idx_image_file_id`(`image_file_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '活动类型与通用图片关联表';
+
+-- ----------------------------
+-- Records of manage_activity_type_image_rel
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for manage_user_activity_rule_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `manage_user_activity_rule_rel`;
+CREATE TABLE `manage_user_activity_rule_rel`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增编号',
+  `user_id` bigint NOT NULL DEFAULT 0 COMMENT '用户编号',
+  `user_type` tinyint NOT NULL DEFAULT 0 COMMENT '用户类型',
+  `activity_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '活动类型',
+  `activity_id` bigint NOT NULL DEFAULT 0 COMMENT '活动编号',
+  `rule_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '规则类型',
+  `rule_id` bigint NOT NULL DEFAULT 0 COMMENT '规则编号',
+  `status` tinyint NOT NULL DEFAULT 0 COMMENT '状态（0 启用 1 停用）',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
+  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
+  INDEX `idx_activity`(`activity_type` ASC, `activity_id` ASC) USING BTREE,
+  INDEX `idx_rule`(`rule_type` ASC, `rule_id` ASC) USING BTREE,
+  INDEX `idx_create_time`(`create_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户与活动规则关联表';
+
+-- ----------------------------
+-- Records of manage_user_activity_rule_rel
+-- ----------------------------
+BEGIN;
+COMMIT;
+```
+
 ## Assumptions & Decisions
 - 表名前缀统一为 `manage_`（用户要求）。
 - 对话日志为“用户-AI助手”场景（用户选择）。
@@ -169,4 +323,3 @@
 - 静态核对 DDL 风格：字段命名/默认值/字符集与现有表一致（参考 `infra_api_access_log`）。
 - 在本地 MySQL 8 执行新增 DDL，确认无语法错误并可正常创建索引。
 - （可选）编写简单插入/查询用例，验证常用索引字段（`conversation_id/user_id/create_time`）查询命中索引。
-
