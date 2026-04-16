@@ -1,16 +1,15 @@
 # 管理（manage）表设计方案：日志与关联
 
 ## Summary
-- 在现有项目表设计规范（统一审计字段 + 逻辑删除 + 多租户）基础上，新增 4 张以 `manage_` 为前缀的表：
+- 在现有项目表设计规范（统一审计字段 + 逻辑删除）基础上，新增 4 张以 `manage_` 为前缀的表：
   - 对话日志表（AI 对话消息级别）
   - 接口调用日志表（对外/对内调用日志，支持关联到对话消息）
   - 活动类型与通用图片关联表（活动类型多态 + 通用图片 file_id）
   - 用户-活动-规则关联表（多态关联：`*_type + *_id`）
 
 ## Current State Analysis
-- 项目已有统一基础字段规范（审计/逻辑删除/租户）：
+- 项目已有统一基础字段规范（审计/逻辑删除）：
   - [BaseDO.java](file:///workspace/yudao-framework/yudao-spring-boot-starter-mybatis/src/main/java/cn/iocoder/yudao/framework/mybatis/core/dataobject/BaseDO.java#L24-L66)：`creator/createTime/updater/updateTime/deleted`
-  - [TenantBaseDO.java](file:///workspace/yudao-framework/yudao-spring-boot-starter-biz-tenant/src/main/java/cn/iocoder/yudao/framework/tenant/core/db/TenantBaseDO.java#L12-L21)：`tenantId`
 - 项目已有日志表设计样例，可复用字段与索引习惯：
   - API 访问日志：`infra_api_access_log` [ruoyi-vue-pro.sql](file:///workspace/sql/mysql/ruoyi-vue-pro.sql#L20-L53)
   - 异常日志：`infra_api_error_log` [ruoyi-vue-pro.sql](file:///workspace/sql/mysql/ruoyi-vue-pro.sql#L60-L96)
@@ -53,7 +52,6 @@
   - `creator` varchar(64)、`create_time` datetime
   - `updater` varchar(64)、`update_time` datetime
   - `deleted` bit(1)
-  - `tenant_id` bigint
 
 **索引建议**
 - `idx_create_time(create_time)`
@@ -99,7 +97,7 @@
   - `end_time` datetime
   - `duration` int
 - 通用字段（按项目规则）
-  - `creator/create_time/updater/update_time/deleted/tenant_id`
+  - `creator/create_time/updater/update_time/deleted`
 
 **索引建议**
 - `idx_create_time(create_time)`
@@ -121,7 +119,7 @@
 - `image_file_id` bigint：通用图片文件 id（对齐 `infra_file.id`）
 - `sort` int：排序
 - `remark` varchar(500)
-- 通用字段（按项目规则）：`creator/create_time/updater/update_time/deleted/tenant_id`
+- 通用字段（按项目规则）：`creator/create_time/updater/update_time/deleted`
 
 **索引建议**
 - `idx_activity_type(activity_type)`
@@ -151,7 +149,7 @@
 - 状态/扩展
   - `status` tinyint：状态（0 启用 / 1 停用）
   - `remark` varchar(500)
-- 通用字段（按项目规则）：`creator/create_time/updater/update_time/deleted/tenant_id`
+- 通用字段（按项目规则）：`creator/create_time/updater/update_time/deleted`
 
 **索引建议**
 - `idx_user_id(user_id)`
@@ -192,7 +190,6 @@ CREATE TABLE `manage_chat_log`  (
   `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
-  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
   INDEX `idx_trace_id`(`trace_id` ASC) USING BTREE,
@@ -237,7 +234,6 @@ CREATE TABLE `manage_api_invoke_log`  (
   `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
-  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_chat_log_id`(`chat_log_id` ASC) USING BTREE,
   INDEX `idx_conversation_id`(`conversation_id` ASC) USING BTREE,
@@ -266,7 +262,6 @@ CREATE TABLE `manage_activity_type_image_rel`  (
   `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
-  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_activity_type`(`activity_type` ASC) USING BTREE,
   INDEX `idx_image_file_id`(`image_file_id` ASC) USING BTREE,
@@ -298,7 +293,6 @@ CREATE TABLE `manage_user_activity_rule_rel`  (
   `updater` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '更新者',
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
-  `tenant_id` bigint NOT NULL DEFAULT 0 COMMENT '租户编号',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_activity`(`activity_type` ASC, `activity_id` ASC) USING BTREE,
@@ -317,7 +311,7 @@ COMMIT;
 - 表名前缀统一为 `manage_`（用户要求）。
 - 对话日志为“用户-AI助手”场景（用户选择）。
 - 活动/规则采用多态关联（`*_type + *_id`），不做外键（用户选择）。
-- DDL 仅落 MySQL（用户选择），并复用项目现有 DDL 风格与字段命名（snake_case + 审计字段 + `deleted` bit(1) + `tenant_id`）。
+- DDL 仅落 MySQL（用户选择），并复用项目现有 DDL 风格与字段命名（snake_case + 审计字段 + `deleted` bit(1)）。
 
 ## Verification
 - 静态核对 DDL 风格：字段命名/默认值/字符集与现有表一致（参考 `infra_api_access_log`）。
