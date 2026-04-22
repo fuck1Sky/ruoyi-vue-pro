@@ -12,7 +12,8 @@
 - 记录系统用户基本信息。
 
 **字段设计（MySQL）**
-- 主键：`id` bigint auto_increment
+- 主键：`id` bigint auto_increment (主键编号)
+- 业务标识：`user_id` bigint (用户编号)
 - 核心信息：`name` varchar(100) - 用户名称
 - 审计及通用字段：`creator`, `create_time`, `updater`, `update_time`, `deleted`
 
@@ -21,7 +22,8 @@
 - 记录系统门店基本信息。
 
 **字段设计（MySQL）**
-- 主键：`id` bigint auto_increment
+- 主键：`id` bigint auto_increment (主键编号)
+- 业务标识：`store_id` bigint (门店编号)
 - 核心信息：`name` varchar(100) - 门店名称
 - 审计及通用字段：`creator`, `create_time`, `updater`, `update_time`, `deleted`
 
@@ -33,7 +35,8 @@
 -- ----------------------------
 DROP TABLE IF EXISTS `manage_user`;
 CREATE TABLE `manage_user`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '用户编号',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键编号',
+  `user_id` bigint NOT NULL DEFAULT 0 COMMENT '用户编号',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '用户名称',
   `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -41,6 +44,7 @@ CREATE TABLE `manage_user`  (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户表';
 
@@ -55,7 +59,8 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `manage_store`;
 CREATE TABLE `manage_store`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '门店编号',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键编号',
+  `store_id` bigint NOT NULL DEFAULT 0 COMMENT '门店编号',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '' COMMENT '门店名称',
   `creator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '创建者',
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -63,6 +68,7 @@ CREATE TABLE `manage_store`  (
   `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否删除',
   PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_store_id`(`store_id` ASC) USING BTREE,
   INDEX `idx_create_time`(`create_time` ASC) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '门店表';
 
